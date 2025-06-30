@@ -36,18 +36,9 @@ Using a virtual environment prevents conflicts with other Python projects.
         .\venv\Scripts\activate
         ```
         **If the above doesn't work go into the \venv\Script and run Activate.ps1**
-    * **macOS/Linux (Bash/Zsh):**
-        ```bash
-        source venv/bin/activate
-        ```
+
     You should see `(venv)` at the start of your terminal prompt, indicating the virtual environment is active.
 6.  **Install dependencies:**
-    Create a `requirements.txt` file in the same directory as the script with these contents:
-    ```
-    pandas
-    openpyxl
-    xlsxwriter
-    ```
     Then, in your activated terminal, run:
     ```bash
     pip install -r requirements.txt
@@ -68,7 +59,6 @@ Since `HOSTNAME_APPLICATION_MAP` contains local-specific data and is not committ
 
 1.  **Locate `config.py.template`** in the project directory.
 2.  **Make a copy** of this file and rename the copy to `config.py`.
-    * On Windows: `copy config.py.template config.py`
 3.  **Open `config.py`** in a text editor.
 4.  **Populate the `HOSTNAME_APPLICATION_MAP` dictionary** with your actual hostnames and their corresponding application names. This is crucial for the script to correctly identify applications for JIRA titles.
     * Example: `"YOUR_SERVER_NAME": "Your Application Name",`

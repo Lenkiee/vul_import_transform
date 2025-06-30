@@ -35,6 +35,8 @@ Using a virtual environment prevents conflicts with other Python projects.
         ```bash
         .\venv\Scripts\activate
         ```
+
+        If the above doesn't work go into the \venv\Script and run Activate.ps1
     * **macOS/Linux (Bash/Zsh):**
         ```bash
         source venv/bin/activate

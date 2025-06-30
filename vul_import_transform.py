@@ -5,6 +5,11 @@ from tkinter import ttk, filedialog, messagebox
 import warnings
 import re
 
+# Import your configuration from config.py
+# This line makes the variables defined in config.py (like HOSTNAME_APPLICATION_MAP)
+# available in this script.
+from config import HOSTNAME_APPLICATION_MAP
+
 # Suppress pandas UserWarnings that might pop up during operations, keeping the console cleaner.
 warnings.simplefilter("ignore", UserWarning)
 
@@ -20,49 +25,14 @@ ENV_MAP = {
     "PRD": "1. Production"
 }
 
-# HOSTNAME_APPLICATION_MAP: This is the SOLE source for mapping hostnames to specific applications.
-# It's crucial for determining the 'Application' part of your JIRA ticket titles.
-# You MUST populate this dictionary with all relevant hostnames and their corresponding application names.
-HOSTNAME_APPLICATION_MAP = {
-    "SVNIBCOSXD103": "OneSumX",
-    "SVNIBCOSXD105": "OneSumX",
-    "SVNIBCOSXT103": "OneSumX",
-    "SVNIBCOSXA103": "OneSumX",
-    "SVNIBCOSXA105": "OneSumX",
-    "SVNIBCOSXP103": "OneSumX",
-    "SVNIBCSQLD027": "OneSumX",
-    "SVNIBCSQLD127": "OneSumX",
-    "SVNIBCSQLT027": "OneSumX",
-    "SVNIBCSQLA027": "OneSumX",
-    "SVNIBCSQLA127": "OneSumX",
-    "SVNIBCSQLP027": "OneSumX",
-    "SVNIBCSQLD031": "FinDM",
-    "SVNIBCSQLT031": "FinDM",
-    "SVNIBCSQLA031": "FinDM",
-    "SVNIBCSQLP031": "FinDM",
-    "SVNIBCOSXD104": "RegPro",
-    "SVNIBCOSXT104": "RegPro",
-    "SVNIBCOSXA104": "RegPro",
-    "SVNIBCOSXA106": "RegPro",
-    "SVNIBCOSXP104": "RegPro",
-    "SVNIBCSQLD028": "RegPro",
-    "SVNIBCSQLT028": "RegPro",
-    "SVNIBCSQLA028": "RegPro",
-    "SVNIBCSQLA128": "RegPro",
-    "SVNIBCSQLP028": "RegPro",
-    "SVNIBCSQLD033": "Anacredit",
-    "SVNIBCSQLT033": "Anacredit",
-    "SVNIBCSQLA033": "Anacredit",
-    "SVNIBCSQLP033": "Anacredit",
-    # Add more hostname-to-application mappings here as needed.
-}
+# HOSTNAME_APPLICATION_MAP is now imported from config.py
+# The original definition has been removed from here.
 
-# GROUP_KEY: Defines the primary column used to group vulnerabilities into individual JIRA tickets.
-# All rows sharing the same value in this column will be consolidated into one ticket.
+
+# Key to group by
 GROUP_KEY = "Synopsis"
 
-# REQUIRED_COLUMNS: A list of column names that MUST be present in your input Excel file.
-# The script will check for these and show an error if any are missing.
+# Expected columns
 REQUIRED_COLUMNS = [
     'Hostname',                 # Identifies the affected machine.
     'Vulnerability',            # The name of the vulnerability.
@@ -87,7 +57,7 @@ VPR_ORDER = {
     "Undefined": 0, "Critical": 1, "High": 2, "Medium": 3, "Low": 4
 }
 
-# --- Core Logic Function ---
+
 def create_final_format(df, selected_envs, selected_vprs):
     """
     Processes the input DataFrame to create the final JIRA-formatted data.
@@ -139,6 +109,7 @@ def create_final_format(df, selected_envs, selected_vprs):
 
             # --- APPLICATION DETERMINATION LOGIC ---
             # This is the single point where the application is determined based on the hostname.
+            # HOSTNAME_APPLICATION_MAP is now accessed from the imported config module.
             if hostname in HOSTNAME_APPLICATION_MAP:
                 group_applications.add(HOSTNAME_APPLICATION_MAP[hostname])
             else:

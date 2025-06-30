@@ -1,4 +1,4 @@
-# JIRA Vulnerability Exporter
+# vul_import_transform
 
 This Python script helps you transform raw vulnerability scan Excel reports into a structured format, suitable for creating JIRA tickets. It groups vulnerabilities by `Synopsis`, enriches data, and allows filtering by environment and VPR.
 
@@ -60,11 +60,19 @@ Using a virtual environment prevents conflicts with other Python projects.
 
 ## Configuration (Edit the Script)
 
-Before running, you **must** customize the following directly in the `jira_exporter.py` file:
+Before running, you **must** customize the following directly in the `vul_import_transform.py` file:
 
-* **`HOSTNAME_APPLICATION_MAP`**: This dictionary is the *only source* for mapping hostnames to applications.
-    * **Edit this section** to include all your hostnames and their corresponding application names.
-    * Example: `"SVNIBCSQLD027": "OneSumX",`
+### 3. Configure Your Mappings
+
+Since `HOSTNAME_APPLICATION_MAP` contains local-specific data and is not committed to version control, you'll need to set it up:
+
+1.  **Locate `config.py.template`** in the project directory.
+2.  **Make a copy** of this file and rename the copy to `config.py`.
+    * On Windows: `copy config.py.template config.py`
+3.  **Open `config.py`** in a text editor.
+4.  **Populate the `HOSTNAME_APPLICATION_MAP` dictionary** with your actual hostnames and their corresponding application names. This is crucial for the script to correctly identify applications for JIRA titles.
+    * Example: `"YOUR_SERVER_NAME": "Your Application Name",`
+5.  **Save `config.py`**.
 
 * **`REQUIRED_COLUMNS`**: If your input Excel file introduces new columns that *must* be present, add their exact names to this list.
 

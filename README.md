@@ -1,135 +1,130 @@
-JIRA Vulnerability Export Tool
-This Python script provides a graphical user interface (GUI) to transform raw vulnerability data from an Excel spreadsheet into a structured format suitable for creating JIRA tickets. It allows users to filter data by environment and VPR (Vulnerability Priority Rating) and then generates an Excel file with "Ticket_Title" and detailed "JIRA_Description" columns for each identified vulnerability group and affected host.
+JIRA Vulnerability Exporter
+This Python script helps you transform raw vulnerability scan Excel reports into a structured format, suitable for creating JIRA tickets. It groups vulnerabilities by Synopsis, enriches data, and allows filtering by environment and VPR.
 
-Features
-GUI-based File Selection: Easily select your input Excel vulnerability report.
+How it Works
+The script provides a simple graphical user interface (GUI):
 
-Environment Filtering: Filter vulnerabilities based on predefined environments (Development, Test, Acceptance, Production).
+Input Excel: It reads an Excel file containing vulnerability data.
 
-VPR Filtering: Optionally filter by specific VPR ratings (Critical, High, Medium, Low, Undefined).
+Configuration: It uses predefined mappings (HOSTNAME_APPLICATION_MAP) to link hostnames to applications.
 
-Automated Ticket Title Generation: Creates concise JIRA ticket titles based on application, VPR, and vulnerability.
+Filtering: You select desired environments (e.g., Dev, TST, PRD) and VPR levels (e.g., Critical, High) via checkboxes.
 
-Detailed JIRA Description: Generates comprehensive descriptions for each JIRA ticket, including:
+Grouping: Vulnerabilities are grouped by their Synopsis and VPR level. Each unique group generates one JIRA ticket.
 
-Affected Hostnames
-
-Environment
-
-Role
-
-Remediation Solution
-
-First Discovered Date
-
-Associated CVEs (Common Vulnerabilities and Exposures)
-
-Plugin Text/Output
-
-Excel Output: Exports the transformed data into a new Excel file, formatted with proper headers and text wrapping.
-
-Error Handling: Includes checks for missing required columns in the input file and provides user-friendly messages.
+Output: It produces a new Excel file with Ticket_Title and JIRA_Description columns, formatted for easy import into JIRA or similar systems.
 
 Getting Started
-Prerequisites
-Before running the script, ensure you have Python installed (version 3.7 or higher recommended). You'll also need the following Python libraries:
+1. Prerequisites
+Python 3.x installed.
+
+Required libraries: pandas, openpyxl (needed by pandas for .xlsx files), xlsxwriter (for formatting output Excel).
+
+2. Setup (Recommended: Virtual Environment)
+Using a virtual environment prevents conflicts with other Python projects.
+
+Open Visual Studio Code.
+
+Open the folder containing this script (.py file).
+
+Open the Integrated Terminal (Terminal > New Terminal or `Ctrl+Shift+``).
+
+Create a virtual environment:
+
+Bash
+
+python -m venv venv
+Activate the virtual environment:
+
+Windows (Command Prompt/PowerShell):
+
+Bash
+
+.\venv\Scripts\activate
+macOS/Linux (Bash/Zsh):
+
+Bash
+
+source venv/bin/activate
+You should see (venv) at the start of your terminal prompt, indicating the virtual environment is active.
+
+Install dependencies:
+Create a requirements.txt file in the same directory as the script with these contents:
 
 pandas
-
-openpyxl (often installed as a dependency for pandas, but good to check)
-
-tkinter (usually comes pre-installed with Python)
-
-xlsxwriter (for advanced Excel formatting)
-
-You can install the necessary libraries using pip:
+openpyxl
+xlsxwriter
+Then, in your activated terminal, run:
 
 Bash
 
-pip install pandas openpyxl xlsxwriter
-Installation
-Save the Script: Save the provided Python code as a .py file (e.g., jira_exporter.py) in a folder.
+pip install -r requirements.txt
+3. Prepare Your Data
+Place your Excel report (.xlsx file) in the same folder as the script.
 
-Place Your Excel Files: Put your Excel vulnerability reports (e.g., vulnerability_report.xlsx) in the same folder as the script. The GUI will automatically detect and list them.
+Verify Column Names: Ensure your Excel report contains all columns listed in REQUIRED_COLUMNS within the script. Missing mandatory columns will cause an error.
 
-Usage
-Run the Script: Open a terminal or command prompt, navigate to the directory where you saved the script, and run it:
+Configuration (Edit the Script)
+Before running, you must customize the following directly in the jira_exporter.py file:
+
+HOSTNAME_APPLICATION_MAP: This dictionary is the only source for mapping hostnames to applications.
+
+Edit this section to include all your hostnames and their corresponding application names.
+
+Example: "SVNIBCSQLD027": "OneSumX",
+
+REQUIRED_COLUMNS: If your input Excel file introduces new columns that must be present, add their exact names to this list.
+
+Running the Script
+Ensure your virtual environment is active (see Step 2 above).
+
+Run the script from your VS Code terminal:
 
 Bash
 
-python jira_exporter.py
-Select Excel File: From the dropdown menu, choose the Excel file you wish to process.
+python your_script_name.py
+(Replace your_script_name.py with the actual file name if you renamed it).
 
-Select Environments: Check the boxes next to the environments you want to include in your output (e.g., Dev, PRD).
+A GUI window will appear.
 
-Filter VPR (Optional): Check the boxes next to the VPR ratings you want to include. If no VPRs are selected, all will be included.
+Using the GUI
+Select Excel File: Choose your vulnerability report from the dropdown menu. Only .xlsx files in the same directory will appear.
 
-Export: Click the "Export Final Format" button.
+Select Environments: Check the boxes for the environments you want to include (e.g., PRD, TST).
 
-Save Output File: A "Save As" dialog will appear. Choose a location and filename for your new Excel file.
+VPR Filter: (Optional) Check the VPR levels you want to include (e.g., Critical, High). If no VPRs are selected, all will be included.
 
-The output Excel file will contain two columns: Ticket_Title and JIRA_Description.
+Click "Export Final Format":
 
-Input Excel File Format
-The script expects your input Excel file to have the following columns precisely named (case-sensitive):
+The script will process the data.
 
-Hostname
+A "Save As" dialog will appear. Choose a location and name for your output Excel file.
 
-Vulnerability
+Advanced Customization
+Adding New Columns to the Output Excel
+The script currently outputs Ticket_Title and JIRA_Description. To add more columns to the final Excel:
 
-Remediation (Solution)
+Locate rows.append(...): Find the line rows.append({"Ticket_Title": ticket_title, "JIRA_Description": description}) in the create_final_format function.
 
-Role
+Add Key-Value Pairs: Insert new entries into this dictionary.
 
-Environment
+"New_Column_Name": value_for_this_ticket
 
-Synopsis
+value_for_this_ticket can be:
 
-Plugin Text
+Data from your input Excel: row.get('YourInputColumnName', 'N/A')
 
-VPR
+A calculated value.
 
-VPR Score
+A fixed string.
 
-First Discovered
+Adding More Details to JIRA_Description
+To include more data points within the JIRA_Description text:
 
-CVE
+Locate the description += (...) block: Find the multi-line f-string that builds the description, typically within the for _, row in group.iterrows(): loop.
 
-If any of these columns are missing, the script will show an error message.
+Access Data: Use row.get('YourColumnName', 'N/A') to safely retrieve data from a specific column for each host.
 
-Configuration
-The script contains internal mappings and settings that can be customized:
+Insert into String: Add a new line to the f-string, embedding the retrieved value.
 
-ENV_MAP: Maps internal environment shortcodes (e.g., "Dev") to more descriptive JIRA-friendly names (e.g., "4. Development"). Modify this dictionary to match your organization's environment naming conventions.
-
-APPLICATION_MAP: Maps raw application names from your report to standardized application names used in JIRA titles. Adjust this to consolidate or rename applications as needed.
-
-GROUP_KEY: Defines the column used to group vulnerabilities into single JIRA tickets (currently Synopsis).
-
-VPR_ORDER: Defines the sorting order for VPRs. Do not change the values (0, 1, 2, etc.) as they define the sorting priority. Only modify the keys (e.g., "Undefined", "Critical") if your VPR names differ.
-
-How It Works
-The core logic resides in the create_final_format function:
-
-Filtering: It first filters the DataFrame based on the selected environments and VPRs.
-
-Sorting: Data is sorted by Synopsis and then by VPR rank to ensure consistent grouping and prioritisation.
-
-Grouping: The script groups rows by Synopsis and VPR. This ensures that vulnerabilities with the same synopsis but different VPRs (e.g., a "Critical" instance on one host and a "High" instance on another, for the same vulnerability synopsis) will generate separate JIRA tickets, which is often desired for prioritization.
-
-Title and Description Generation: For each group:
-
-A Ticket_Title is created by combining mapped applications, the highest VPR in the group, and the vulnerability name.
-
-A JIRA_Description is built iteratively, listing each affected host with its environment, role, remediation, first discovered date, CVEs, and relevant plugin text.
-
-GUI Integration: The FinalExportGUI class handles the user interface, file selection, filter options, and the export process, providing a user-friendly experience.
-
-Troubleshooting
-"Missing Columns" Error: Check your input Excel file's column headers carefully. They must exactly match the names listed in the "Input Excel File Format" section above (case-sensitive).
-
-"No Data after filtering" Error: This means your selected environments and VPR filters resulted in an empty dataset. Try broadening your filter selections.
-
-Script Doesn't Start: Ensure you have installed all required libraries (pandas, openpyxl, xlsxwriter). Also, verify your Python installation.
-
-Plugin Text Formatting: The script attempts to clean HTML-like tags (<plugin_output>) from the Plugin Text. If your plugin text contains other unusual characters or formatting, you might need to adjust the re.sub line in create_final_format.
+Example: f" New Detail: {new_detail_variable}\n"

@@ -18,4 +18,5 @@ venv/
 
 # Excel temporary files
 ~$*.xlsx
+*.xlsx
 *.tmp

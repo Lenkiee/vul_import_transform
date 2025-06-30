@@ -16,22 +16,52 @@ ENV_MAP = {
     "PRD": "1. Production"
 }
 
-APPLICATION_MAP = {
-    "OSX Application Server": "OneSumX",
-    "OSX application": "OneSumX",
-    "OneSumX SQL": "OneSumX",
-    "Database AnaCredit": "Anacredit",
-    "Application Server RegPro": "RegPro",
-    "RegPro": "RegPro"
+# Map Hostnames directly to Applications - THIS IS THE ONLY SOURCE
+HOSTNAME_APPLICATION_MAP = {
+    "SVNIBCOSXD103": "OneSumX",
+    "SVNIBCOSXD105": "OneSumX",
+    "SVNIBCOSXT103": "OneSumX",
+    "SVNIBCOSXA103": "OneSumX",
+    "SVNIBCOSXA105": "OneSumX",
+    "SVNIBCOSXP103": "OneSumX",
+    "SVNIBCSQLD027": "OneSumX",
+    "SVNIBCSQLD127": "OneSumX",
+    "SVNIBCSQLT027": "OneSumX",
+    "SVNIBCSQLA027": "OneSumX",
+    "SVNIBCSQLA127": "OneSumX",
+    "SVNIBCSQLP027": "OneSumX",
+    "SVNIBCSQLD031": "FinDM",
+    "SVNIBCSQLT031": "FinDM",
+    "SVNIBCSQLA031": "FinDM",
+    "SVNIBCSQLP031": "FinDM",
+    "SVNIBCOSXD104": "RegPro",
+    "SVNIBCOSXT104": "RegPro",
+    "SVNIBCOSXA104": "RegPro",
+    "SVNIBCOSXA106": "RegPro",
+    "SVNIBCOSXP104": "RegPro",
+    "SVNIBCSQLD028": "RegPro",
+    "SVNIBCSQLT028": "RegPro",
+    "SVNIBCSQLA028": "RegPro",
+    "SVNIBCSQLA128": "RegPro",
+    "SVNIBCSQLP028": "RegPro",
+    "SVNIBCSQLD033": "Anacredit",
+    "SVNIBCSQLT033": "Anacredit",
+    "SVNIBCSQLA033": "Anacredit",
+    "SVNIBCSQLP033": "Anacredit",
+    # Populate this with ALL your definitive hostname-to-application mappings.
+    # E.g., "SVNIBCSQLD027": "OneSumX",
 }
+
 
 # Key to group by
 GROUP_KEY = "Synopsis"
 
-# Expected columns - ADDED 'First Discovered' and 'CVE'
+# Expected columns
 REQUIRED_COLUMNS = [
     'Hostname', 'Vulnerability', 'Remediation (Solution)', 'Role', 'Environment',
     'Synopsis', 'Plugin Text', 'VPR', 'VPR Score', 'First Discovered', 'CVE'
+    # ADD NEW REQUIRED COLUMNS HERE IF THEY ARE MANDATORY
+    # 'NewMandatoryColumn',
 ]
 
 # Fixed VPR order - now exactly matching your Excel file
@@ -57,36 +87,48 @@ def create_final_format(df, selected_envs, selected_vprs):
     df['vpr_rank'] = df['VPR'].map(VPR_ORDER).fillna(99)
     df = df.sort_values(by=[GROUP_KEY, 'vpr_rank'])
 
-    # Group by synopsis AND VPR to force separation of critical vs high
     rows = []
     for (synopsis, vpr), group in df.groupby([GROUP_KEY, 'VPR']):
-        highest_vpr = vpr  # because we're grouping by it, it's the same for all in this group
+        highest_vpr = vpr
 
-        # Collect roles & applications (Application might not exist in some files)
-        all_values = group['Role'].dropna().tolist()
-        if 'Application' in group.columns:
-            all_values.extend(group['Application'].dropna().tolist())
+        # --- REVISED LOGIC FOR DETERMINING APPLICATION (ONLY HOSTNAME MAP) ---
+        group_applications = set()
+        for _, row in group.iterrows():
+            hostname = row['Hostname']
 
-        mapped_apps = sorted(set(APPLICATION_MAP.get(val, val) for val in all_values))
-        app_string = ", ".join(mapped_apps) if mapped_apps else "N/A"
+            # Only attempt to map by Hostname
+            if hostname in HOSTNAME_APPLICATION_MAP:
+                group_applications.add(HOSTNAME_APPLICATION_MAP[hostname])
+            else:
+                group_applications.add("N/A") # Default to N/A if hostname not in map
+
+        # Logic to format the application string for the ticket title
+        mapped_apps_list = sorted(list(group_applications))
+        if "N/A" in mapped_apps_list and len(mapped_apps_list) > 1:
+            mapped_apps_list.remove("N/A") # Remove N/A if other apps are present
+        
+        app_string = ", ".join(mapped_apps_list) if mapped_apps_list else "N/A"
+
 
         ticket_title = f"{app_string} - {highest_vpr} - {group.iloc[0]['Vulnerability']}"
 
         description = "Affected Hosts:\n"
         for _, row in group.iterrows():
             plugin_text = re.sub(r"</?plugin_output>", "", row.get('Plugin Text', 'N/A'), flags=re.IGNORECASE).strip()
-            
-            # Retrieve 'First Discovered' and 'CVE'
             first_discovered = row.get('First Discovered', 'N/A')
             cve = row.get('CVE', 'N/A')
+
+        # --- ADD NEW COLUMNS HERE ---
+        # Use .get() with a default 'N/A' for columns that might not always be present or are optional like this "cve = row.get('CVE', 'N/A')"
 
             description += (f"* Host: {row['Hostname']}\n"
                             f"  Environment: {row['Environment']}\n"
                             f"  Role: {row['Role']}\n"
                             f"  Remediation: {row['Remediation (Solution)']}\n"
                             f"  First Discovered: {first_discovered}\n"
-                            f"  CVE: {cve}\n"  
+                            f"  CVE: {cve}\n"
                             f"  Plugin Text:\n{plugin_text}\n\n")
+                            # --- INSERT NEW COLUMNS INTO THE DESCRIPTION STRING ---
 
         rows.append({"Ticket_Title": ticket_title, "JIRA_Description": description})
 

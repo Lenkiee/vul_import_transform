@@ -28,10 +28,10 @@ APPLICATION_MAP = {
 # Key to group by
 GROUP_KEY = "Synopsis"
 
-# Expected columns
+# Expected columns - ADDED 'First Discovered' and 'CVE'
 REQUIRED_COLUMNS = [
     'Hostname', 'Vulnerability', 'Remediation (Solution)', 'Role', 'Environment',
-    'Synopsis', 'Plugin Text', 'VPR', 'VPR Score'
+    'Synopsis', 'Plugin Text', 'VPR', 'VPR Score', 'First Discovered', 'CVE'
 ]
 
 # Fixed VPR order - now exactly matching your Excel file
@@ -75,11 +75,17 @@ def create_final_format(df, selected_envs, selected_vprs):
         description = "Affected Hosts:\n"
         for _, row in group.iterrows():
             plugin_text = re.sub(r"</?plugin_output>", "", row.get('Plugin Text', 'N/A'), flags=re.IGNORECASE).strip()
+            
+            # Retrieve 'First Discovered' and 'CVE'
+            first_discovered = row.get('First Discovered', 'N/A')
+            cve = row.get('CVE', 'N/A')
 
             description += (f"* Host: {row['Hostname']}\n"
                             f"  Environment: {row['Environment']}\n"
                             f"  Role: {row['Role']}\n"
                             f"  Remediation: {row['Remediation (Solution)']}\n"
+                            f"  First Discovered: {first_discovered}\n"
+                            f"  CVE: {cve}\n"  
                             f"  Plugin Text:\n{plugin_text}\n\n")
 
         rows.append({"Ticket_Title": ticket_title, "JIRA_Description": description})

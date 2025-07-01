@@ -6,8 +6,6 @@ import warnings
 import re
 
 # Import your configuration from config.py
-# This line makes the variables defined in config.py (like HOSTNAME_APPLICATION_MAP)
-# available in this script.
 from config import HOSTNAME_APPLICATION_MAP
 
 # Suppress pandas UserWarnings that might pop up during operations, keeping the console cleaner.
@@ -109,7 +107,6 @@ def create_final_format(df, selected_envs, selected_vprs):
 
             # --- APPLICATION DETERMINATION LOGIC ---
             # This is the single point where the application is determined based on the hostname.
-            # HOSTNAME_APPLICATION_MAP is now accessed from the imported config module.
             if hostname in HOSTNAME_APPLICATION_MAP:
                 group_applications.add(HOSTNAME_APPLICATION_MAP[hostname])
             else:
@@ -183,7 +180,7 @@ class FinalExportGUI:
         """Initializes the main Tkinter window and sets up instance variables."""
         self.root = tk.Tk() # Create the main window.
         self.root.title("JIRA Vulnerability Exporter") # Set the window title.
-        self.root.geometry("700x550") # Set the initial window size, adjusted for new fields.
+        self.root.geometry("600x400") # Set the initial window size, adjusted for new fields.
 
         self.file_path = None # Stores the path to the selected Excel file.
         self.env_selections = {} # Dictionary to hold BooleanVar objects for environment checkboxes.
@@ -233,7 +230,7 @@ class FinalExportGUI:
             ttk.Checkbutton(vpr_frame, text=vpr, variable=var).pack(side="left", padx=5)
             self.vpr_selections[vpr] = var
 
-        # --- New: Jira CSV Options Frame ---
+        # Jira CSV Options Frame ---
         jira_options_frame = ttk.LabelFrame(frame, text="JIRA CSV Options", padding=10)
         jira_options_frame.pack(fill="x", pady=5)
 

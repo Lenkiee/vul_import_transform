@@ -10,9 +10,6 @@ __pycache__/
 # Virtual environment
 venv/
 
-# Jupyter Notebook files
-.ipynb_checkpoints
-
 # VSCode files
 .vscode/
 
@@ -20,3 +17,5 @@ venv/
 ~$*.xlsx
 *.xlsx
 *.tmp
+*.csv
+~$*.csv

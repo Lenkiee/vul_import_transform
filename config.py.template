@@ -1,0 +1,10 @@
+# config.py
+
+# Map Hostnames directly to Applications - THIS IS THE ONLY SOURCE FOR HOSTNAME MAPPING
+# Populate this with ALL your definitive hostname-to-application mappings.
+HOSTNAME_APPLICATION_MAP = {
+    "SVABCDEFGD001": "Applcation A",
+    "SVABCDEFGD001": "Application B",
+    "SVABCDEFGD001": "Application C"
+    # Add more hostname-to-application mappings here as needed.
+}

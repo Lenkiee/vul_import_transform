@@ -23,10 +23,6 @@ ENV_MAP = {
     "PRD": "1. Production"
 }
 
-# HOSTNAME_APPLICATION_MAP is now imported from config.py
-# The original definition has been removed from here.
-
-
 # Key to group by
 GROUP_KEY = "Synopsis"
 
